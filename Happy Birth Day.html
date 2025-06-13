@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>จดหมายรักวันเกิด 💌</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <!-- สำหรับ iOS web app full screen -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Prompt&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #fff0f5, #ffe6eb);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Prompt', sans-serif;
+      overflow-x: hidden; /* ป้องกัน scroll แนวนอน */
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased; /* ละเอียดตัวอักษรบน iOS */
+      -webkit-touch-callout: none; /* ปิดเมนูคัดลอกบน iOS */
+      touch-action: manipulation; /* ปรับแต่ง gesture ให้ดีขึ้น */
+    }
+
+    .container {
+      text-align: center;
+      width: 100%;
+      max-width: 800px;
+      padding: 0 15px; /* เว้นระยะซ้ายขวาให้มือถือ */
+      box-sizing: border-box;
+    }
+
+    .envelope {
+      width: 300px;
+      height: 200px;
+      background: #ff8080;
+      position: relative;
+      margin: 0 auto 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      cursor: default;
+      transition: width 0.3s ease, height 0.3s ease;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .flap {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: #ff4d4d;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      z-index: 2;
+    }
+
+    .hand {
+      font-size: 48px;
+      display: none;
+      animation: moveHand 1.5s forwards;
+      position: absolute;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    @keyframes moveHand {
+      0% { bottom: 20%; opacity: 0; }
+      50% { bottom: 35%; opacity: 1; }
+      100% { bottom: 70%; opacity: 0; }
+    }
+
+    .letter {
+      display: none;
+      margin: 5px auto auto auto; /* เท่ากันซ้ายขวา และเว้นบนล่าง */
+      padding: 30px 30px;       /* เท่ากันซ้ายขวา */
+      max-width: 750px;         /* กำหนดขนาดสูงสุด */
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.25);
+      animation: slideUp 1s ease forwards;
+      white-space: pre-wrap;
+      font-size: 20px;
+      line-height: 1.4;
+      word-break: break-word;
+      text-align: left;         /* ให้ข้อความอ่านง่าย ชิดซ้าย */
+    }
+
+    @keyframes slideUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .question-box {
+      background: white;
+      padding: 18px 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      display: none;
+      max-width: 450px;
+      margin: 10px auto;
+      font-size: 16px;
+      word-break: break-word;
+    }
+
+    .question-box.active {
+      display: block;
+    }
+
+    button {
+      padding: 12px 25px;
+      margin: 5px;
+      background: #ff6666;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      -webkit-tap-highlight-color: transparent; /* ป้องกันสี highlight บนมือถือ */
+      touch-action: manipulation;
+    }
+
+    button:hover:not(:disabled),
+    button:focus:not(:disabled) {
+      background: #ff4d4d;
+      outline: none;
+    }
+
+    button:disabled {
+      background: #ff9999;
+      cursor: default;
+    }
+
+    #openEnvelopeBtn {
+      display: none;
+      margin-top: 15px;
+    }
+
+    #startBtn {
+      margin-bottom: 25px;
+    }
+
+    .heart {
+      position: fixed;
+      font-size: 26px;
+      color: #ff3b5c;
+      user-select: none;
+      pointer-events: none;
+      text-shadow: 0 0 5px #ff6699;
+      animation: floatUp 4s linear forwards;
+      opacity: 0.8;
+      z-index: 5;
+      will-change: transform, opacity;
+    }
+
+    @keyframes floatUp {
+      0% {
+        transform: translateY(100vh) scale(1);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-20vh) scale(1.5);
+        opacity: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .envelope {
+        width: 140px !important;
+        height: 110px !important;
+      }
+      .letter {
+        font-size: 16px !important;
+        padding: 15px !important;
+        max-width: 90vw !important;
+      }
+      .question-box {
+        font-size: 15px !important;
+        padding: 15px !important;
+        max-width: 90vw !important;
+      }
+      button {
+        font-size: 16px !important;
+        padding: 10px 18px !important;
+      }
+      .hand {
+        font-size: 40px !important;
+      }
+    }
+
+    /* ปรับให้ focus ring ดูดีบนมือถือและ desktop */
+    button:focus-visible {
+      outline: 3px solid #ff4d4d;
+      outline-offset: 2px;
+    }
+
+    /* หัวข้อ */
+    .letter h3 {
+      margin-top: 0;
+      margin-bottom: 10px;  /* เว้นขอบล่างระหว่างหัวข้อกับข้อความ */
+      text-align: center;   /* หัวข้อกึ่งกลาง */
+      font-weight: 700;
+    }
+
+/* ข้อความย่อย */
+    .letter p {
+      margin-top: 0;
+      margin-bottom: 10px;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <!-- ปุ่มเริ่มต้นการเปิดจดหมาย -->
+    <button id="startBtn">Open a letter</button>
+
+    <!-- รูปซองจดหมาย -->
+    <div class="envelope" id="envelope" aria-label="ซองจดหมาย">
+      <div class="flap"></div> <!-- ฝาซอง -->
+    </div>
+
+    <!-- คำถามทีละข้อ จะแสดงทีละกล่อง -->
+    <div class="question-box" id="q1">
+      <p>Are you sure you want to open this letter?</p>
+      <button onclick="nextQuestion('q1', 'q2')">Next 🫰</button>
+    </div>
+
+    <div class="question-box" id="q2">
+      <p>Do you know what Ice wants to say?</p>
+      <button onclick="nextQuestion('q2', 'q3')">Next 🫰</button>
+    </div>
+
+    <div class="question-box" id="q3">
+      <p>Will you cry while reading this? If you don't cry, you're already good at it.</p>
+      <button onclick="nextQuestion('q3', 'q4')">Next 🫰</button>
+    </div>
+
+    <div class="question-box" id="q4">
+      <p>Even though he is shy and doesn't show it, he still cares all the time. And today, he has something to give you. Hahaha.</p>
+      <button onclick="nextQuestion('q4', 'final')"> Next 🍨</button>
+    </div>
+
+    <!-- ปุ่มเปิดจดหมาย หลังผ่านคำถามทั้งหมด -->
+    <button id="openEnvelopeBtn" aria-label="เปิดจดหมาย">open</button>
+
+    <!-- ไอคอนมือแสดงแอนิเมชัน -->
+    <div class="hand" id="hand" aria-hidden="true">🤚</div>
+
+    <!-- เนื้อหาจดหมาย -->
+    <div class="letter" id="letter" tabindex="0" aria-live="polite" aria-atomic="true">
+      <h3>💌 Birthday Wishes Letter</h3>
+      <p id="message"></p>
+    </div>
+  </div>
+
+  <script>
+    'use strict';
+    // ตัวแปรเก็บ element ต่างๆ ที่จะใช้งาน
+    const startBtn = document.getElementById('startBtn');
+    const questions = ['q1', 'q2', 'q3', 'q4']; // ลำดับคำถาม
+    const openEnvelopeBtn = document.getElementById('openEnvelopeBtn');
+    const hand = document.getElementById('hand');
+    const envelope = document.getElementById('envelope');
+    const letter = document.getElementById('letter');
+    const messageElem = document.getElementById('message');
+    let currentQ = 0; // ติดตามคำถามปัจจุบัน
+    let heartIntervalId; // เก็บ ID interval สำหรับหัวใจ
+
+    // ข้อความอวยพรวันเกิดที่จะแสดงทีละตัว (typewriter)
+    const messageText = `🎉 Wishing you lots of happiness 
+    💝and may only good things come into your life.🥂 
+    🎂May all your wishes come true, good luck in everything you do,💞 
+    🥳and may you overcome every challenge that comes your way.🎊`;
+
+    // เริ่มคำถามข้อแรกเมื่อกดปุ่มเริ่ม
+    startBtn.addEventListener('click', () => {
+      startBtn.style.display = 'none'; // ซ่อนปุ่มเริ่ม
+      document.getElementById(questions[currentQ]).classList.add('active'); // แสดงคำถามแรก
+    });
+
+    /**
+     * ฟังก์ชันเปลี่ยนคำถาม
+     * @param {string} currentId - id ของคำถามปัจจุบัน
+     * @param {string} nextId - id ของคำถามถัดไป หรือ 'final' หากจบคำถาม
+     */
+    function nextQuestion(currentId, nextId) {
+      // ซ่อนคำถามปัจจุบัน
+      document.getElementById(currentId).classList.remove('active');
+
+      if (nextId === 'final') {
+        // แสดงปุ่มเปิดจดหมายเมื่อจบคำถามทั้งหมด
+        openEnvelopeBtn.style.display = 'inline-block';
+      } else {
+        // แสดงคำถามถัดไป
+        document.getElementById(nextId).classList.add('active');
+      }
+    }
+
+    /**
+     * แอนิเมชันมือหยิบจดหมาย
+     * คืน Promise เพื่อให้รอจนแอนิเมชันเสร็จ
+     */
+    function openEnvelopeAnimation() {
+      return new Promise(resolve => {
+        hand.style.display = 'block'; // แสดงมือ
+        hand.style.animation = 'moveHand 1.5s forwards'; // เริ่มแอนิเมชัน
+        setTimeout(() => {
+          hand.style.display = 'none'; // ซ่อนมือ
+          envelope.style.display = 'none'; // ซ่อนซองจดหมาย
+          resolve(); // แอนิเมชันเสร็จ
+        }, 1500);
+      });
+    }
+
+    /**
+     * แสดงข้อความทีละตัว (typewriter effect)
+     * คืน Promise เพื่อให้รอจนพิมพ์จบ
+     * @param {string} text - ข้อความที่จะพิมพ์
+     * @param {HTMLElement} element - element ที่จะใส่ข้อความ
+     * @param {number} speed - ความเร็วพิมพ์ (ms)
+     */
+    function typeWriter(text, element, speed = 50) {
+      return new Promise(resolve => {
+        let i = 0;
+        element.textContent = ''; // เคลียร์ข้อความเดิม
+        function type() {
+          if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          } else {
+            resolve(); // พิมพ์เสร็จ
+          }
+        }
+        type();
+      });
+    }
+
+    /**
+     * สร้างหัวใจตัวเดียวและแอนิเมชันลอยขึ้น
+     */
+    function createHeart() {
+      const heart = document.createElement('div');
+      heart.classList.add('heart');
+      heart.textContent = '❤️';
+      // กำหนดตำแหน่งสุ่มในแนวนอน
+      heart.style.left = `${Math.random() * window.innerWidth}px`;
+      // กำหนดขนาดสุ่มเล็กน้อย
+      heart.style.fontSize = `${20 + Math.random() * 20}px`;
+      document.body.appendChild(heart);
+      // ลบหัวใจเมื่อแอนิเมชันจบ
+      heart.addEventListener('animationend', () => heart.remove());
+    }
+
+    /**
+     * สร้างหัวใจหลายตัวในช่วงเวลาสั้นๆ (กลุ่ม)
+     * @param {number} n - จำนวนหัวใจ
+     */
+    function createHeartGroup(n = 15) {
+      for (let i = 0; i < n; i++) {
+        setTimeout(createHeart, i * 200); // สร้างทีละหัวใจ ทุกๆ 200ms
+      }
+    }
+
+    /**
+     * เริ่มสร้างหัวใจกลุ่มแรกและตั้ง interval ให้ลอยต่อเนื่อง
+     * คืนค่า interval id ไว้เก็บเพื่อหยุดถ้าต้องการ
+     */
+    function startHeartGroups() {
+      createHeartGroup();
+      return setInterval(createHeartGroup, 1500); // สร้างทุก 1.5 วินาที
+    }
+
+    // เมื่อกดปุ่มเปิดจดหมาย
+    openEnvelopeBtn.addEventListener('click', async () => {
+      // ปิดปุ่มทันทีเพื่อป้องกันกดซ้ำ
+      openEnvelopeBtn.disabled = true;
+      openEnvelopeBtn.style.display = 'none';
+      openEnvelopeBtn.setAttribute('aria-disabled', 'true');
+
+      // รอแอนิเมชันมือหยิบจดหมายเสร็จ
+      await openEnvelopeAnimation();
+
+      // แสดงจดหมาย และโฟกัสเพื่อผู้ใช้ที่ใช้ screen reader
+      letter.style.display = 'block';
+      letter.focus();
+
+      // เริ่มหัวใจลอยขึ้นเรื่อยๆ
+      heartIntervalId = startHeartGroups();
+
+      // พิมพ์ข้อความทีละตัว
+      await typeWriter(messageText, messageElem);
+
+      // เริ่มหัวใจลอยขึ้นเรื่อยๆ
+      heartIntervalId = startHeartGroups();
+    });
+  </script>
+</body>
+</html>
